@@ -1,10 +1,154 @@
 ﻿<!DOCTYPE html>
+
 <html>
 <head>
-    <meta http-equiv="refresh" content="0; https://github.com/vilic/drop" />
-    <title>Redirecting...</title>
+    <title>Drop Demo</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <style>
+        body {
+            padding-top: 20px;
+        }
+
+        #footer {
+            margin: 40px 0 15px 0;
+            color: #ccc;
+        }
+    </style>
 </head>
 <body>
+    <script id="body-template" type="text/template">
+        <div id="wrap">
+            <div class="container">
+                <div class="navbar navbar-default">
+                    <div class="container-fluid">
+                        <div class="navbar-header">
+                            {@href github.url}
+                            <a class="navbar-brand">{title}</a>
+                        </div>
+                        <div class="navbar-collapse collapse">
+                            <ul class="nav navbar-nav">
+                                {#each navLinks}
+                                {@class active ? "active" : ""}
+                                <li>
+                                    {@href url}
+                                    <a>{name}</a>
+                                </li>
+                            </ul>
+                            <ul class="nav navbar-nav navbar-right">
+                                {#each otherLinks}
+                                <li>
+                                    {@href url}
+                                    <a>{name}</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
+            <div class="container">
+                {%click-toggle intro.showIntro}
+                <a href="javascript:;">{intro.showIntro ? 'Hide intro' : 'Show intro'}</a>
+            </div>
+
+            {#scope intro}
+            {%var editEnabled = false}
+            {%if intro.showIntro}
+            <div class="container">
+                <!-- intro title -->
+                <h2>
+                    {%click-toggle editEnabled}
+                    <a href="javascript:;">{editEnabled ? 'Done' : 'Edit'}</a>
+                    {title.toUpperCase()}
+                </h2>
+                {%show editEnabled}
+                <div class="form-group">
+                    {@class "form-control"}
+                    <!-- approach no.1 -->
+                    {&input title}
+                </div>
+                <!-- paragraphs -->
+                {#each paragraphs}
+                <p>
+                    {>click remove}
+                    <a href="javascript:;">Remove</a>
+                    [{paragraphIndexes[this.index] || '...'}] {this}
+                </p>
+
+                <div class="text-center">
+                    {@href github.url}
+                    <a class="btn btn-primary btn-lg">GitHub</a>
+                </div>
+                <h2>
+                    New Paragraph...
+                    {>click addParagraph}
+                    <a href="javascript:;">Add</a>
+                </h2>
+                <div class="form-group">
+                    {%var newParagraphText = 'New paragraph...'}
+                    {@class "form-control"}
+                    <!-- approach no.2 -->
+                    {&input value = newParagraphText}
+                </div>
+            </div>
+        </div>
+
+        {#scope legalInfo}
+        <div id="footer" class="text-center">
+            {="<b>{license} License</b>"}<br />
+            ©{new Date().getFullYear()} {author}
+        </div>
+    </script>
+    <script src="../drop.js"></script>
+    <script>
+        function addParagraph(e, scope) {
+            var data = scope.dataHelper;
+            var text = data.newParagraphText;
+            data.paragraphs.push(text);
+        }
+
+        var data = new Drop.Data({
+            title: 'Drop',
+            navLinks: [
+                {
+                    name: 'Demo',
+                    url: '#',
+                    active: true
+                },
+                {
+                    name: 'Issues',
+                    url: 'https://github.com/vilic/drop/issues',
+                    active: false
+                }
+            ],
+            otherLinks: [
+                {
+                    name: 'My Blog',
+                    url: 'http://vilic.info'
+                }
+            ],
+            intro: {
+                showIntro: false,
+                title: 'Just Another Passion Wheel!',
+                paragraphIndexes: ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'],
+                paragraphs: [
+                    'The idea of Drop was already in my mind several years ago, and actually I tried to implement it several years ago. Unfortunately, I met some problems and didn\'t make it.',
+                    'Years later when frameworks like Angular and Ember are already popular, I still feel better on my own. One of the reasons is that, why use double curly braces while single one can handle it gentlely?',
+                    'However, I am now working on my WordsBaking project (a vocabulary app) and I shouldn\'t pay much time developing a framework like this. I have to figure out a way which will make it simpler and easier to achieve.',
+                    'And that brought the philosophy of Drop: decorators. The parsing process of the template is very simple, regex replacing the decorators like {abc} with <drop> elements, then give the task to the browsers.',
+                    'More.'
+                ]
+            },
+            github: {
+                url: 'https://github.com/vilic/drop'
+            },
+            legalInfo: {
+                license: 'MIT',
+                author: 'VILIC VANE'
+            }
+        });
+
+        var template = Drop.Template.apply('body-template', data, document.body);
+    </script>
 </body>
 </html>
